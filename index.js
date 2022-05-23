@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -50,6 +50,19 @@ async function run() {
             res.send({ success: true, data: products });
 
         })
+        // product get For user
+        app.get('/userProduct', async (req, res) => {
+            const email = req.email;
+            const products = await productsCollection.find(email).toArray()
+            res.send({ success: true, data: products });
+
+        })
+
+
+
+
+
+
 
 
 
