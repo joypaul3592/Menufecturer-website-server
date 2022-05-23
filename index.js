@@ -108,6 +108,12 @@ async function run() {
         })
 
 
+        // GET all user
+        app.get('/users', async (req, res) => {
+            const users = await usersCollection.find().toArray()
+            res.send(users)
+        })
+
 
 
     } catch (error) {
