@@ -22,6 +22,23 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'UnAuthorized Access' })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'Forbidden Access ' })
+        }
+        req.decoded = decoded;
+        next()
+    });
+}
+
+
+
 
 
 async function run() {
@@ -37,10 +54,7 @@ async function run() {
         // Product post method
         app.post('/product', async (req, res) => {
             const product = req.body;
-            console.log(product);
-
             await productsCollection.insertOne(product);
-
             res.send({ success: true, message: `SuccesFully Added ${product.name}` })
 
         })
@@ -53,10 +67,17 @@ async function run() {
 
         })
         // product get For user
-        app.get('/userProduct', async (req, res) => {
-            const email = req.email;
-            const products = await productsCollection.find(email).toArray()
-            res.send({ success: true, data: products });
+        app.get('/userProduct', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+            if (email === decodedEmail) {
+                const query = { email: email }
+                const products = await productsCollection.find(query).toArray()
+                console.log(products);
+                return res.send({ success: true, data: products });
+            } else {
+                return res.status(403).send({ message: 'Forbidden Access' })
+            }
 
         })
 
