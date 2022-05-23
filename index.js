@@ -59,7 +59,14 @@ async function run() {
         })
 
 
-
+        // delete user product
+        app.delete('/userProduct/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: ObjectId(id) }
+            const product = await productsCollection.deleteOne(query);
+            res.send({ success: true, data: product });
+        })
 
 
 
