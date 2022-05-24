@@ -46,6 +46,7 @@ async function run() {
         await client.connect();
         const productsCollection = client.db("ViticDB").collection("product");
         const usersCollection = client.db("ViticDB").collection("users");
+        const reviewCollection = client.db("ViticDB").collection("reviews");
 
 
 
@@ -66,6 +67,7 @@ async function run() {
             res.send({ success: true, data: products });
 
         })
+
         // product get For user
         app.get('/userProduct', verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -109,10 +111,59 @@ async function run() {
 
 
         // GET all user
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyJWT, async (req, res) => {
             const users = await usersCollection.find().toArray()
             res.send(users)
         })
+
+
+        // make admin roal
+        app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const requester = req.decoded.email;
+            const requerstAccount = await usersCollection.findOne({ email: requester })
+            if (requerstAccount.role === 'admin') {
+                const filter = { email: email }
+                const updateDoc = {
+                    $set: { role: 'admin' },
+                };
+                const result = await usersCollection.updateOne(filter, updateDoc)
+                res.send(result);
+            } else {
+                res.status(403).send({ message: 'Forbidden Access' })
+            }
+        })
+
+
+        // get admin
+
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await usersCollection.findOne({ email: email })
+            const isAdmin = user.role === 'admin';
+
+            res.send({ admin: isAdmin })
+        })
+
+
+
+        // Add Review
+        app.post('/review', async (req, res) => {
+            const review = req.body;
+            await reviewCollection.insertOne(review);
+            res.send({ success: true })
+
+        })
+
+        // Get Review
+
+        // Product get method
+        app.get('/review', async (req, res) => {
+            const reviews = await reviewCollection.find().toArray();
+            res.send({ success: true, data: reviews });
+
+        })
+
 
 
 
