@@ -47,6 +47,7 @@ async function run() {
         const productsCollection = client.db("ViticDB").collection("product");
         const usersCollection = client.db("ViticDB").collection("users");
         const reviewCollection = client.db("ViticDB").collection("reviews");
+        const userInfoCollection = client.db("ViticDB").collection("userInfo");
 
 
 
@@ -160,6 +161,22 @@ async function run() {
             const reviews = await reviewCollection.find().toArray();
             res.send({ success: true, data: reviews });
 
+        })
+
+
+        // Put User Info
+        app.put('/userInfo/:email', async (req, res) => {
+            const email = req.params.email;
+            const userInfo = req.body;
+            const filter = { email: email }
+            const option = { upsert: true }
+            const updateDoc = {
+                $set: userInfo,
+            };
+
+            const result = await userInfoCollection.updateOne(filter, updateDoc, option)
+
+            res.send({ success: true, data: result });
         })
 
 
