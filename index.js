@@ -69,6 +69,15 @@ async function run() {
 
         })
 
+        // Find One Product By Id
+        app.get('/productDtails/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const product = await productsCollection.findOne(query);
+            res.send({ success: true, data: product });
+        })
+
+
         // product get For user
         app.get('/userProduct', verifyJWT, async (req, res) => {
             const email = req.query.email;
@@ -76,7 +85,6 @@ async function run() {
             if (email === decodedEmail) {
                 const query = { email: email }
                 const products = await productsCollection.find(query).toArray()
-                console.log(products);
                 return res.send({ success: true, data: products });
             } else {
                 return res.status(403).send({ message: 'Forbidden Access' })
@@ -165,7 +173,7 @@ async function run() {
 
 
         // Put User Info
-        app.put('/userInfo/:email', async (req, res) => {
+        app.put('/userInfo/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const userInfo = req.body;
             const filter = { email: email }
