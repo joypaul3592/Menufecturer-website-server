@@ -53,7 +53,7 @@ async function run() {
 
 
         // Product post method
-        app.post('/product', async (req, res) => {
+        app.post('/product', verifyJWT, async (req, res) => {
             const product = req.body;
             await productsCollection.insertOne(product);
             res.send({ success: true, message: `SuccesFully Added ${product.name}` })
@@ -148,7 +148,7 @@ async function run() {
 
 
         // Add Review
-        app.post('/review', async (req, res) => {
+        app.post('/review', verifyJWT, async (req, res) => {
             const review = req.body;
             await reviewCollection.insertOne(review);
             res.send({ success: true })
@@ -156,9 +156,7 @@ async function run() {
         })
 
         // Get Review
-
-        // Product get method
-        app.get('/review', async (req, res) => {
+        app.get('/review', verifyJWT, async (req, res) => {
             const reviews = await reviewCollection.find().toArray();
             res.send({ success: true, data: reviews });
 
