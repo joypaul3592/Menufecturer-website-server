@@ -193,12 +193,12 @@ async function run() {
         })
 
         // orders get For user
-        app.get('/userProduct', verifyJWT, async (req, res) => {
-            const email = req.query.email;
+        app.get('/userProduct/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
             const decodedEmail = req.decoded.email;
             if (email === decodedEmail) {
                 const query = { email: email }
-                const products = await productsCollection.find(query).toArray()
+                const products = await ordersCollection.find(query).toArray();
                 return res.send({ success: true, data: products });
             } else {
                 return res.status(403).send({ message: 'Forbidden Access' })
