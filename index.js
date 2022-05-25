@@ -48,6 +48,7 @@ async function run() {
         const usersCollection = client.db("ViticDB").collection("users");
         const reviewCollection = client.db("ViticDB").collection("reviews");
         const userInfoCollection = client.db("ViticDB").collection("userInfo");
+        const ordersCollection = client.db("ViticDB").collection("orders");
 
 
 
@@ -62,12 +63,14 @@ async function run() {
         })
 
 
-        // Product get method
-        app.get('/product', async (req, res) => {
+        // Get Product method
+        app.get('/product', verifyJWT, async (req, res) => {
             const products = await productsCollection.find().toArray()
             res.send({ success: true, data: products });
 
         })
+
+
 
         // Find One Product By Id
         app.get('/productDtails/:id', verifyJWT, async (req, res) => {
@@ -75,21 +78,6 @@ async function run() {
             const query = { _id: ObjectId(id) }
             const product = await productsCollection.findOne(query);
             res.send({ success: true, data: product });
-        })
-
-
-        // product get For user
-        app.get('/userProduct', verifyJWT, async (req, res) => {
-            const email = req.query.email;
-            const decodedEmail = req.decoded.email;
-            if (email === decodedEmail) {
-                const query = { email: email }
-                const products = await productsCollection.find(query).toArray()
-                return res.send({ success: true, data: products });
-            } else {
-                return res.status(403).send({ message: 'Forbidden Access' })
-            }
-
         })
 
 
@@ -187,6 +175,36 @@ async function run() {
             res.send({ success: true, data: result });
         })
 
+
+
+
+        // Order Post Method
+        app.post('/orders', verifyJWT, async (req, res) => {
+            const product = req.body;
+            await ordersCollection.insertOne(product);
+            res.send({ success: true, message: `SuccesFully Added ${product.name}` })
+
+        })
+
+        // Get All Orders
+        app.get('/orders', verifyJWT, async (req, res) => {
+            const products = await ordersCollection.find().toArray();
+            return res.send({ success: true, data: products });
+        })
+
+        // orders get For user
+        app.get('/userProduct', verifyJWT, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+            if (email === decodedEmail) {
+                const query = { email: email }
+                const products = await productsCollection.find(query).toArray()
+                return res.send({ success: true, data: products });
+            } else {
+                return res.status(403).send({ message: 'Forbidden Access' })
+            }
+
+        })
 
 
 
