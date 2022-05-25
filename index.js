@@ -133,7 +133,6 @@ async function run() {
 
 
         // get admin
-
         app.get('/admin/:email', async (req, res) => {
             const email = req.params.email;
             const user = await usersCollection.findOne({ email: email })
@@ -203,8 +202,25 @@ async function run() {
             } else {
                 return res.status(403).send({ message: 'Forbidden Access' })
             }
-
         })
+
+
+        // delete user Order
+        app.delete('/userOrder/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: ObjectId(id) }
+            const product = await ordersCollection.deleteOne(query);
+            res.send({ success: true, data: product });
+        })
+
+
+
+
+
+
+
+
 
 
 
