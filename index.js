@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 5000;
 require('dotenv').config()
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 
 // middleware
@@ -49,6 +49,7 @@ async function run() {
         const reviewCollection = client.db("ViticDB").collection("reviews");
         const userInfoCollection = client.db("ViticDB").collection("userInfo");
         const ordersCollection = client.db("ViticDB").collection("orders");
+        const paymentsCollection = client.db("ViticDB").collection("payments");
 
 
 
@@ -75,13 +76,12 @@ async function run() {
             };
 
             const result = await productsCollection.updateOne(filter, updateDoc, option)
-            console.log(result);
             res.send({ success: true, updateData: result });
         })
 
 
         // Get Product method
-        app.get('/product', verifyJWT, async (req, res) => {
+        app.get('/product', async (req, res) => {
             const products = await productsCollection.find().toArray()
             res.send({ success: true, data: products });
 
@@ -93,7 +93,6 @@ async function run() {
         app.get('/productDtails/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
-            console.log(query);
             const product = await productsCollection.findOne(query);
             res.send({ success: true, data: product });
         })
@@ -102,7 +101,6 @@ async function run() {
         // delete user product
         app.delete('/userProduct/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
             const query = { _id: ObjectId(id) }
             const product = await productsCollection.deleteOne(query);
             res.send({ success: true, data: product });
@@ -170,7 +168,7 @@ async function run() {
         })
 
         // Get Review
-        app.get('/review', verifyJWT, async (req, res) => {
+        app.get('/review', async (req, res) => {
             const reviews = await reviewCollection.find().toArray();
             res.send({ success: true, data: reviews });
 
@@ -234,16 +232,51 @@ async function run() {
 
 
         // Get user Order
-        app.get('/orderDtails/:id', verifyJWT, async (req, res) => {
+        app.get('/orderProduct/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
-            console.log(id);
             const query = { _id: ObjectId(id) }
-            console.log(query);
             const product = await ordersCollection.findOne(query);
-            console.log(product);
             res.send({ success: true, data: product });
         })
 
+        // put Order
+        app.patch('/upOrder/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId,
+                },
+            };
+            const result = await paymentsCollection.insertOne(payment)
+            const updatedOrder = await ordersCollection.updateOne(filter, updateDoc)
+
+            res.send(updateDoc);
+        })
+
+
+        // Payment Stript
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            console.log('kaj ki hobe nah');
+            const service = req.body;
+            console.log(service);
+            const price = service.price;
+            console.log(price);
+            const amount = price * 100;
+            console.log(amount);
+            // Create a PaymentIntent with the order amount and currency
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card'],
+            });
+            // console.log(paymentIntent);
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        });
 
 
 
