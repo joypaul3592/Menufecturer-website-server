@@ -63,6 +63,23 @@ async function run() {
         })
 
 
+        // Update Product 
+        app.put('/updateProduct/:id', async (req, res) => {
+            const id = req.params.id;
+            const stock = req.body;
+            console.log(stock);
+            const filter = { _id: ObjectId(id) };
+            const option = { upsert: true }
+            const updateDoc = {
+                $set: stock,
+            };
+
+            const result = await productsCollection.updateOne(filter, updateDoc, option)
+            console.log(result);
+            res.send({ success: true, updateData: result });
+        })
+
+
         // Get Product method
         app.get('/product', verifyJWT, async (req, res) => {
             const products = await productsCollection.find().toArray()
@@ -76,6 +93,7 @@ async function run() {
         app.get('/productDtails/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
+            console.log(query);
             const product = await productsCollection.findOne(query);
             res.send({ success: true, data: product });
         })
@@ -102,7 +120,7 @@ async function run() {
             };
 
             const result = await usersCollection.updateOne(filter, updateDoc, option)
-            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '1h' });
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '12h' });
             res.send({ success: true, data: result, token: token });
         })
 
@@ -208,7 +226,6 @@ async function run() {
         // delete user Order
         app.delete('/userOrder/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
             const query = { _id: ObjectId(id) }
             const product = await ordersCollection.deleteOne(query);
             res.send({ success: true, data: product });
@@ -216,7 +233,16 @@ async function run() {
 
 
 
-
+        // Get user Order
+        app.get('/orderDtails/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: ObjectId(id) }
+            console.log(query);
+            const product = await ordersCollection.findOne(query);
+            console.log(product);
+            res.send({ success: true, data: product });
+        })
 
 
 
