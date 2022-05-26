@@ -184,12 +184,19 @@ async function run() {
             const updateDoc = {
                 $set: userInfo,
             };
-
             const result = await userInfoCollection.updateOne(filter, updateDoc, option)
 
             res.send({ success: true, data: result });
         })
 
+
+        // get userinfo
+        app.get('/upUserInfo/:email', async (req, res) => {
+            const email = req.params.id;
+            const query = { email: email }
+            const userIn = await userInfoCollection.findOne(query);
+            res.send({ success: true, data: userIn });
+        })
 
 
 
