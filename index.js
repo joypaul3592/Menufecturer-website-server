@@ -239,22 +239,40 @@ async function run() {
             res.send({ success: true, data: product });
         })
 
-        // put Order
+        // Patch Order
         app.patch('/upOrder/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const payment = req.body;
+            console.log(payment);
             const filter = { _id: ObjectId(id) }
+            const option = { upsert: true }
             const updateDoc = {
                 $set: {
                     paid: true,
-                    transactionId: payment.transactionId,
+                    transactionId: payment.transsactionId,
                 },
             };
             const result = await paymentsCollection.insertOne(payment)
-            const updatedOrder = await ordersCollection.updateOne(filter, updateDoc)
-
+            const updatedOrder = await ordersCollection.updateOne(filter, updateDoc, option)
+            console.log(up);
             res.send(updateDoc);
         })
+
+
+
+        // Patch Order
+        app.put('/paidUpInfo/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const paidInfo = req.body;
+            const filter = { _id: ObjectId(id) }
+            const updateDoc = {
+                $set: paidInfo,
+            };
+            const updatedPanding = await ordersCollection.updateOne(filter, updateDoc)
+            console.log(updatedPanding);
+            res.send(updateDoc);
+        })
+
 
 
         // Payment Stript
