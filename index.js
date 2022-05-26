@@ -192,9 +192,11 @@ async function run() {
 
         // get userinfo
         app.get('/upUserInfo/:email', async (req, res) => {
-            const email = req.params.id;
+            const email = req.params.email;
             const query = { email: email }
+            console.log(query);
             const userIn = await userInfoCollection.findOne(query);
+            console.log(userIn);
             res.send({ success: true, data: userIn });
         })
 
