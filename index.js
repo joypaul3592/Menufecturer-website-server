@@ -243,7 +243,7 @@ async function run() {
         app.patch('/upOrder/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const payment = req.body;
-            console.log(payment);
+            // console.log(payment);
             const filter = { _id: ObjectId(id) }
             const option = { upsert: true }
             const updateDoc = {
@@ -254,7 +254,6 @@ async function run() {
             };
             const result = await paymentsCollection.insertOne(payment)
             const updatedOrder = await ordersCollection.updateOne(filter, updateDoc, option)
-            console.log(up);
             res.send(updateDoc);
         })
 
@@ -269,7 +268,6 @@ async function run() {
                 $set: paidInfo,
             };
             const updatedPanding = await ordersCollection.updateOne(filter, updateDoc)
-            console.log(updatedPanding);
             res.send(updateDoc);
         })
 
@@ -277,13 +275,9 @@ async function run() {
 
         // Payment Stript
         app.post('/create-payment-intent', verifyJWT, async (req, res) => {
-            console.log('kaj ki hobe nah');
             const service = req.body;
-            console.log(service);
             const price = service.price;
-            console.log(price);
             const amount = price * 100;
-            console.log(amount);
             // Create a PaymentIntent with the order amount and currency
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
