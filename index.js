@@ -68,7 +68,6 @@ async function run() {
         app.put('/updateProduct/:id', async (req, res) => {
             const id = req.params.id;
             const stock = req.body;
-            console.log(stock);
             const filter = { _id: ObjectId(id) };
             const option = { upsert: true }
             const updateDoc = {
@@ -194,9 +193,7 @@ async function run() {
         app.get('/upUserInfo/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
-            console.log(query);
             const userIn = await userInfoCollection.findOne(query);
-            console.log(userIn);
             res.send({ success: true, data: userIn });
         })
 
@@ -287,13 +284,11 @@ async function run() {
             const service = req.body;
             const price = service.price;
             const amount = price * 100;
-            // Create a PaymentIntent with the order amount and currency
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
                 currency: 'usd',
                 payment_method_types: ['card'],
             });
-            // console.log(paymentIntent);
             res.send({
                 clientSecret: paymentIntent.client_secret,
             });
